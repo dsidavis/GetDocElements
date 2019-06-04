@@ -131,3 +131,34 @@ function(node, boxes, pos = getBBox2(list(node)))
 {
     pos[,1] >= boxes[,1] & pos[,2] > boxes[,2] & (pos[,1] + pos[,3]) < boxes[,3] & (pos[,2] + pos[,4]) < boxes[,4] 
 }
+
+
+getBelowLine =
+    ## check that the font for the content below is different from the document font
+    ## XXX If line in 2nd column and lower than one in column 1, we won't get anything. So deal with both columns.
+    ###
+function(doc, col = 1, colPos = getColPositions(p1))
+{
+    if(is.character(doc))
+        doc = readPDFXML(doc)
+
+    p1 = doc[[1]]
+    
+    lines = getBBox(p1)
+     # Get horizontal lines only
+    lines = lines[ lines[, "y0"] == lines[, "y1"], ]
+
+    tlines = if(col == length(colPos))
+               lines[lines[, "x0"] >= colPos[2] ,]
+            else
+                lines[lines[, "x0"] < colPos[2] ,]
+    tlines = tlines[tlines[,"y0"] == max(tlines[, "y0"]) ,]
+    if(is.matrix(tlines))
+        tlines = tlines[1,]
+
+    xpath.query = sprintf(".//text[ @top > %f and (@left + @width ) < %f]", tlines["y0"], colPos[2] )
+    txt = getNodeSet(p1, xpath.query)
+    ## Check these are all in a different font than the document's regular text.
+
+    txt
+}
