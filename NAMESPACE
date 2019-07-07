@@ -1,4 +1,4 @@
-
+import(ReadPDF)
 export(getSectionText, findSectionHeaders)
 
 export(getCaption, getHeader, getLines, getTables)
